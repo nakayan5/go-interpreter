@@ -34,6 +34,7 @@ var keywords = map[string]TokenType{
 	"let": LET,
 }
 
+// keywordsテーブルをチェックして、渡された識別子が実はキーワードではなかったかどうかを確認する。
 func LookupIdent(ident string) TokenType {
 	if tok, ok := keywords[ident]; ok {
 		return tok

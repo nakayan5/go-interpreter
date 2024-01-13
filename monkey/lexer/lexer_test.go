@@ -57,7 +57,10 @@ let result = add(five, ten);`
 		{token.EOF, ""},
 	}
 
+	// 初期化
 	l := New(input)
+
+	// 期待値と比較
 	for i, tt := range tests {
 		tok := l.NextToken()
 		if tok.Type != tt.expectedType {

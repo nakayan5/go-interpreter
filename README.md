@@ -9,10 +9,18 @@ go test ./monkey/lexer
 ```
 
 <details>
-<summary>メモ</summary>
+<summary open>メモ1</summary>
 字句解析器にソースコードを与えて初期化し、繰り返し NextToken()を呼ぶことでソースコードを読み進めていく。
 トークンごとに、文字ごとに進んでいく。
-</details>
+<details>
+
+<br />
+
+<details>
+<summary open>メモ2</summary>
+字句解析器の仕事は、コードが意味をなすか、動作するか、エラーを含むかを判定することではないから。
+字句解析器には入力をトークン列に変換することだけが求められる。
+<details>
 
 ## 2. 構文解析
 

@@ -14,6 +14,8 @@ go test ./monkey/lexer
 トークンごとに、文字ごとに進んでいく。
 </details>
 
+<br />
+
 <details>
 <summary open>メモ2</summary>
 字句解析器の仕事は、コードが意味をなすか、動作するか、エラーを含むかを判定することではないから。

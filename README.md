@@ -4,7 +4,7 @@
 
 ## 1. 字句解析
 
-```
+```go
 go test ./monkey/lexer
 ```
 
@@ -22,6 +22,18 @@ go test ./monkey/lexer
 字句解析器には入力をトークン列に変換することだけが求められる。
 </details>
 
+<br />
+
+```go
+go run ./monkey/main.go
+```
+
+<details>
+<summary open>メモ3</summary>
+REPLは「Read(読み込み)、Eval(評価)、Print(表示)、Loop(繰り返し)」の略.
+REPLは入力を読み込んで、インタプリタに送って評価させ、インタプリタの結果/出力を表示して、また最初に戻る。読み込み、評価、表示、繰り返し。
+</details>
+
 ## 2. 構文解析
 
 ## 3. 評価
@@ -33,8 +45,4 @@ go test ./monkey/lexer
 ```
 // q: 次の関数の要約をしてください。
 // a:
-```
-
-```
-
 ```

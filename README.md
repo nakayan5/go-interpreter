@@ -5,7 +5,7 @@
 ## 1. 字句解析
 
 ```go
-go test ./monkey/lexer
+go test -v ./monkey/lexer
 ```
 
 <details open>
@@ -58,7 +58,7 @@ REPLは入力を読み込んで、インタプリタに送って評価させ、�
 </details>
 
 ```go
-go test ./monkey/parser
+go test -v ./monkey/parser
 ```
 
 <br />

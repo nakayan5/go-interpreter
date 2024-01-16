@@ -49,6 +49,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LET:
 		return p.parseLetStatement()
+	case token.RETURN:
+		return p.parseReturnStatement()
 	default:
 		return nil
 	}
@@ -64,6 +66,18 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	if !p.expectPeek(token.ASSIGN) {
 		return nil
 	}
+	// TODO: セミコロンに遭遇するまで式を読み飛ばしてしまっている
+	for !p.curTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+	// fmt.Println("stmt:", stmt.Value)
+	return stmt
+}
+
+// return文をパースする関数です。return文は、returnキーワード、式、セミコロンから構成されます。
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	stmt := &ast.ReturnStatement{Token: p.curToken}
+	p.nextToken()
 	// TODO: セミコロンに遭遇するまで式を読み飛ばしてしまっている
 	for !p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()

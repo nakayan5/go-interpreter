@@ -9,11 +9,18 @@ import (
 )
 
 type Parser struct {
-	l         *lexer.Lexer
-	errors    []string
-	curToken  token.Token // positon
-	peekToken token.Token // readPosition
+	l              *lexer.Lexer
+	errors         []string
+	curToken       token.Token // positon
+	peekToken      token.Token // readPosition
+	prefixParseFns map[token.TokenType]prefixParseFn
+	infixParseFns  map[token.TokenType]infixParseFn
 }
+
+type (
+	prefixParseFn func() ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
+)
 
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
@@ -26,6 +33,7 @@ func New(l *lexer.Lexer) *Parser {
 	return p
 }
 
+// 内部でlexer.readCharを呼び出しているので、lexerのreadPositionとpositionが進む
 func (p *Parser) nextToken() {
 	p.curToken = p.peekToken
 	p.peekToken = p.l.NextToken()
@@ -90,6 +98,7 @@ func (p *Parser) curTokenIs(t token.TokenType) bool {
 }
 
 // アサーション関数
+// 内部でnextTokenを呼び出しているので、lexerのreadPositionとpositionが進む
 func (p *Parser) expectPeek(t token.TokenType) bool {
 	if p.peekTokenIs(t) {
 		p.nextToken()
@@ -113,4 +122,12 @@ func (p *Parser) peekError(t token.TokenType) {
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead",
 		t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
+}
+
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+
+func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
 }

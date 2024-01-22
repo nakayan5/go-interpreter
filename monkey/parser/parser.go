@@ -46,6 +46,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
+	p.registerPrefix(token.BANG, p.parsePrefixExpression)
+	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
 
 	return p
 }
@@ -82,8 +84,28 @@ func (p *Parser) parseStatement() ast.Statement {
 }
 
 // @description tokenは進めない
+// q: 返り値はast.Expressionを指定しているが、ast.Identifierを返せるのか？
+// a: ast.Expressionはast.Identifierを含む
 func (p *Parser) parseIdentifier() ast.Expression {
+	// q: なぜ&をつけるのか？
+	// a: &をつけないと、ast.IdentifierのValueが空になってしまう
+	// q: なぜ&をつけないと、ast.IdentifierのValueが空になってしまうのか？
+	// a: &をつけないと、ast.IdentifierのValueが空になってしまうのは、
+	//    以下のように、ast.IdentifierのValueにp.curToken.Literalを代入しているから
+	// fmt.Println("-------", &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal})
+	// fmt.Println(">>>>>>>", ast.Identifier{Token: p.curToken, Value: p.curToken.Literal})
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	expression := &ast.PrefixExpression{
+		Token:    p.curToken,
+		Operator: p.curToken.Literal,
+	}
+	// -5
+	p.nextToken()                                // ここでtokenが進む
+	expression.Right = p.parseExpression(PREFIX) // 5
+	return expression
 }
 
 // let文をパースする関数です。let文は、letキーワード、識別子、イコール、式、セミコロンから構成されます。
@@ -118,17 +140,24 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
 
+	// fmt.Println("parseExpressionStatement", p)
+
 	stmt.Expression = p.parseExpression(LOWEST)
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
+	// fmt.Println("parseExpressionStatement", stmt)
+
 	return stmt
 }
 
+// 引数として与えられたトークンのタイプに対応するprefixParseFnをprefixParseFnsから取得し、その関数を呼び出しその結果を返します。
+// precedenceは、現在のトークンの優先順位を示します。この関数が呼び出されると、トークンは1つ進みます。
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
+		p.noPrefixParseFnError(p.curToken.Type)
 		return nil
 	}
 	leftExp := prefix()
@@ -166,6 +195,7 @@ func (p *Parser) peekError(t token.TokenType) {
 	p.errors = append(p.errors, msg)
 }
 
+// prefixParseFnsにfnを登録する
 func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
 	p.prefixParseFns[tokenType] = fn
 }
@@ -184,4 +214,10 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	}
 	lit.Value = value
 	return lit
+}
+
+// 引数として与えられたトークンのタイプに対応するprefixParseFnをprefixParseFnsから取得し、その関数を呼び出します。
+func (p *Parser) noPrefixParseFnError(t token.TokenType) {
+	msg := fmt.Sprintf("no prefix parse function for %s found", t)
+	p.errors = append(p.errors, msg)
 }
